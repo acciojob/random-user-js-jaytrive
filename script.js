@@ -1,23 +1,44 @@
 //your code here
-let buttons=document.querySelectorAll('button');
-let info=document.createElement('div');
-let section=document.getElementById('section');
-async function findUser(){
-	info.innerText="";
-	let res=await fetch("https://randomuser.me/api/");
-	const data=await res.json();
-	document.getElementsByTagName('img')[0].src=data.results[0].picture.large;
-	document.getElementsByTagName('h2')[0].innerText=data.results[0].name.first +" "+ data.results[0].name.last;
-	console.log(data);
-	localStorage.setItem('user',JSON.stringify(data));
-}
+$(document).ready(function() {
+            // function to get a random user from the API
+            function getRandomUser() {
+                $.ajax({
+                    url: 'https://randomuser.me/api/',
+                    dataType: 'json',
+                    success: function(data) {
+                        // display the user's name and photo
+                        $('#userName').text(data.results[0].name.first + ' ' + data.results[0].name.last);
+                        $('#userImage').attr('src', data.results[0].picture.large);
 
-buttons.forEach((button) => {
-	button.addEventListener('click', (event) => {
-		let attr=event.target.getAttribute('data-attr');
-		if(attr=='phone') info.innerText= JSON.parse(localStorage.getItem('user')).results[0].phone;
-		if(attr=='email') info.innerText= JSON.parse(localStorage.getItem('user')).results[0].email;
-		if(attr=='age') info.innerText= JSON.parse(localStorage.getItem('user')).results[0].dob.age;
-	})
-})
-section.appendChild(info);
+                        // store the user's age, email, and phone in variables
+                        var age = data.results[0].dob.age;
+                        var email = data.results[0].email;
+                        var phone = data.results[0].phone;
+
+                        // set the data-attr attribute of each button to the corresponding variable
+                        $('.infoButton[data-attr="age"]').attr('data-info', age);
+                        $('.infoButton[data-attr="email"]').attr('data-info', email);
+                        $('.infoButton[data-attr="phone"]').attr('data-info', phone);
+                    }
+                });
+            }
+
+            // call the function to get a random user on page load
+            getRandomUser();
+
+            // function to display the relevant info when a button is clicked
+            $('.infoButton').on('click', function() {
+                // remove any previously displayed info
+                $('.info').hide();
+
+                // display the relevant info
+                var infoType = $(this).data('attr');
+                var info = $(this).data('info');
+                $('#' + infoType + 'Info').text(info).show();
+            });
+
+            // function to get a new random user when the "Get User" button is clicked
+            $('#getUser').on('click', function() {
+                getRandomUser();
+            });
+        });
